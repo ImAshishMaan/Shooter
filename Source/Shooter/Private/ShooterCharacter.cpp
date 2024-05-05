@@ -65,12 +65,16 @@ void AShooterCharacter::LookUpAtRate(float Rate) {
 }
 
 void AShooterCharacter::FireWeapon() {
-	UE_LOG(LogTemp, Warning, TEXT("Firing"));
 	if(FireSound) {
 		UGameplayStatics::PlaySound2D(this, FireSound);
 		if(MuzzleFlash) {
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, GetMesh()->GetSocketLocation(MuzzleFlashSocket));
 		}
+	}
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if(HipFireMontage && AnimInstance) {
+		AnimInstance->Montage_Play(HipFireMontage);
+		AnimInstance->Montage_JumpToSection("StartFire", HipFireMontage);
 	}
 }
 
