@@ -1,5 +1,2 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "GameModeBase/ShooterGameModeBase.h"
+#include "Shooter/Public/GameModeBase/ShooterGameModeBase.h"
 
