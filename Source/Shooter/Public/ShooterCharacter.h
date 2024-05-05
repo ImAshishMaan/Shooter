@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "ShooterCharacter.generated.h"
 
+class USoundCue;
 class UCameraComponent;
 class USpringArmComponent;
 
@@ -22,8 +23,7 @@ protected:
 	void TurnAtRate(float Rate); 
 	void LookUpAtRate(float Rate);
 
-	void Jump() override;
-
+	void FireWeapon();
 public:
 	virtual void Tick(float DeltaTime) override;
 
@@ -42,6 +42,14 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	float BaseLookUpRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	USoundCue* FireSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* MuzzleFlash;
+	
+	FName MuzzleFlashSocket;
 
 public:
 
