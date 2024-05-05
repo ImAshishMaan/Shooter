@@ -47,7 +47,13 @@ private:
 	USoundCue* FireSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	UParticleSystem* MuzzleFlash;
+	UParticleSystem* MuzzleFlashEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* ImpactEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* BeamParticleEffect;
 	
 	FName MuzzleFlashSocket;
 

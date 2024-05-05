@@ -4,6 +4,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
 
 AShooterCharacter::AShooterCharacter() {
@@ -67,15 +68,39 @@ void AShooterCharacter::LookUpAtRate(float Rate) {
 void AShooterCharacter::FireWeapon() {
 	if(FireSound) {
 		UGameplayStatics::PlaySound2D(this, FireSound);
-		if(MuzzleFlash) {
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, GetMesh()->GetSocketLocation(MuzzleFlashSocket));
+		const FTransform SocketTransform = GetMesh()->GetSocketTransform(MuzzleFlashSocket);
+		if(MuzzleFlashEffect) {
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlashEffect, SocketTransform);
 		}
+		
+		FHitResult FireHit;
+		const FVector FireStart = SocketTransform.GetLocation();
+		const FQuat Rotation { SocketTransform.GetRotation() };
+		const FVector RotationAxis { Rotation.GetAxisX() };
+		const FVector FireEnd { FireStart + RotationAxis * 50'000.0f };
+
+		FVector BeamEndPoint = FireEnd;
+		
+		GetWorld()->LineTraceSingleByChannel(FireHit, FireStart, FireEnd, ECollisionChannel::ECC_Visibility);
+		if(FireHit.bBlockingHit) {
+			BeamEndPoint = FireHit.ImpactPoint;
+				
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, FireHit.ImpactPoint);
+		}
+		if(BeamParticleEffect) {
+			UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticleEffect, SocketTransform);
+			if(Beam) {
+				Beam->SetVectorParameter(FName("Target"), BeamEndPoint);
+			}
+		}
+		
 	}
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if(HipFireMontage && AnimInstance) {
 		AnimInstance->Montage_Play(HipFireMontage);
 		AnimInstance->Montage_JumpToSection("StartFire", HipFireMontage);
 	}
+
 }
 
 void AShooterCharacter::Tick(float DeltaTime) {
