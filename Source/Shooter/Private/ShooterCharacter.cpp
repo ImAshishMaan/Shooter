@@ -73,8 +73,44 @@ void AShooterCharacter::FireWeapon() {
 		if(MuzzleFlashEffect) {
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlashEffect, SocketTransform);
 		}
+
+		FVector2D ViewportSize;
+		if(GEngine && GEngine->GameViewport) {
+			GEngine->GameViewport->GetViewportSize(ViewportSize);
+			
+		}
+		FVector2D CrosshairLocation(ViewportSize.X / 2.0f, ViewportSize.Y / 2.0f);
+		CrosshairLocation.Y -= 50.0f;
+
+		FVector CrosshairWorldPosition;
+		FVector CrosshairWorldDirection;
 		
-		FHitResult FireHit;
+		bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0),
+			CrosshairLocation, CrosshairWorldPosition, CrosshairWorldDirection);
+
+		if(bScreenToWorld) {
+			FHitResult ScreenTraceHit;
+			const FVector Start = CrosshairWorldPosition;
+			const FVector End = CrosshairWorldPosition + CrosshairWorldDirection * 50'000.0f;
+
+			FVector BeamEndPoint = End;
+			GetWorld()->LineTraceSingleByChannel(ScreenTraceHit, Start, End, ECollisionChannel::ECC_Visibility);
+			
+			if(ScreenTraceHit.bBlockingHit) {
+				BeamEndPoint = ScreenTraceHit.Location; // Set the endpoint to the location of the hit
+				if(ImpactEffect) {
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, ScreenTraceHit.Location);
+				}
+			}
+			if(BeamParticleEffect) {
+				UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticleEffect, SocketTransform);
+				if(Beam) {
+					Beam->SetVectorParameter(FName("Target"), BeamEndPoint);
+				}
+			}
+		}
+		
+		/*FHitResult FireHit;
 		const FVector FireStart = SocketTransform.GetLocation();
 		const FQuat Rotation { SocketTransform.GetRotation() };
 		const FVector RotationAxis { Rotation.GetAxisX() };
@@ -95,13 +131,13 @@ void AShooterCharacter::FireWeapon() {
 			}
 		}
 		
+		}
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if(HipFireMontage && AnimInstance) {
+			AnimInstance->Montage_Play(HipFireMontage);
+			AnimInstance->Montage_JumpToSection("StartFire", HipFireMontage);
+		}*/
 	}
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if(HipFireMontage && AnimInstance) {
-		AnimInstance->Montage_Play(HipFireMontage);
-		AnimInstance->Montage_JumpToSection("StartFire", HipFireMontage);
-	}
-
 }
 
 void AShooterCharacter::Tick(float DeltaTime) {
