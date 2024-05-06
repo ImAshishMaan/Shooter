@@ -17,6 +17,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	void CameraZoomAim(float DeltaTime);
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
@@ -71,6 +72,10 @@ private:
 
 	float CameraDefaultFOV;
 	float CameraZoomedFOV;
+	float CameraCurrentFOV;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	float ZoomInterpSpeed;
 
 public:
 

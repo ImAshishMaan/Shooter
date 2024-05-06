@@ -37,6 +37,8 @@ AShooterCharacter::AShooterCharacter() {
 	bAiming = false;
 	CameraDefaultFOV = 0.0f;
 	CameraZoomedFOV = 35.0f;
+	ZoomInterpSpeed = 20.0f;
+	CameraCurrentFOV = 0.0f;
 	
 }
 
@@ -45,7 +47,23 @@ void AShooterCharacter::BeginPlay() {
 	
 	if(FollowCamera) {
 		CameraDefaultFOV = FollowCamera->FieldOfView;
+		CameraCurrentFOV = CameraDefaultFOV;
 	}
+}
+
+void AShooterCharacter::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+
+	CameraZoomAim(DeltaTime);
+}
+
+void AShooterCharacter::CameraZoomAim(float DeltaTime) {
+	if(bAiming) {
+		CameraCurrentFOV = FMath::FInterpTo(CameraCurrentFOV, CameraZoomedFOV, DeltaTime, ZoomInterpSpeed);
+	} else {
+		CameraCurrentFOV = FMath::FInterpTo(CameraCurrentFOV, CameraDefaultFOV, DeltaTime, ZoomInterpSpeed);
+	}
+	FollowCamera->SetFieldOfView(CameraCurrentFOV);
 }
 
 void AShooterCharacter::MoveForward(float Value) {
@@ -174,15 +192,9 @@ bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, 
 
 void AShooterCharacter::AimButtonPressed() {
 	bAiming = true;
-	FollowCamera->SetFieldOfView(CameraZoomedFOV);
 }
 void AShooterCharacter::AimButtonReleased() {
 	bAiming = false;
-	FollowCamera->SetFieldOfView(CameraDefaultFOV);
-}
-
-void AShooterCharacter::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
 }
 
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
