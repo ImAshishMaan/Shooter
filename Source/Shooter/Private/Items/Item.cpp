@@ -1,6 +1,7 @@
 #include "Items/Item.h"
 
 #include "Components/BoxComponent.h"
+#include "Components/WidgetComponent.h"
 
 AItem::AItem() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -11,6 +12,8 @@ AItem::AItem() {
 	CollisionBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBoxComp"));
 	CollisionBoxComp->SetupAttachment(ItemMeshComp);
 
+	PickupWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidgetComp"));
+	PickupWidgetComp->SetupAttachment(Get);
 	
 }
 

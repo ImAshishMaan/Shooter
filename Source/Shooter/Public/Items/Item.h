@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Item.generated.h"
 
+class UWidgetComponent;
 class UBoxComponent;
 
 UCLASS()
@@ -25,6 +26,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* CollisionBoxComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	UWidgetComponent* PickupWidgetComp;
 
 public:
 	
