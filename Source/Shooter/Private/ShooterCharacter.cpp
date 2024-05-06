@@ -50,6 +50,10 @@ AShooterCharacter::AShooterCharacter() {
 	MouseHipLookUpRate = 1.0f;
 	MouseAimingTurnRate = 0.2f;
 	MouseAimingLookUpRate = 0.2f;
+
+	AutomaticFireRate = 0.1f;
+	bShouldFire = true;
+	bFireButtonPressed = false;
 	
 }
 
@@ -220,6 +224,28 @@ void AShooterCharacter::AimButtonReleased() {
 	bAiming = false;
 }
 
+void AShooterCharacter::FireButtonPressed() {
+	bFireButtonPressed = true;
+	StartFireTimer();
+}
+void AShooterCharacter::FireButtonReleased() {
+	bFireButtonPressed = false;
+}
+
+void AShooterCharacter::StartFireTimer() {
+	if(bShouldFire) {
+		FireWeapon();
+		bShouldFire = false;
+		GetWorldTimerManager().SetTimer(AutoFireTimer, this, &AShooterCharacter::AutoFireReset, AutomaticFireRate);
+	}
+}
+void AShooterCharacter::AutoFireReset() {
+	bShouldFire = true;
+	if(bFireButtonPressed) {
+		StartFireTimer();
+	}
+}
+
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	
@@ -231,7 +257,8 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AShooterCharacter::Jump);
-	PlayerInputComponent->BindAction("FireButton", IE_Pressed, this, &AShooterCharacter::FireWeapon);
+	PlayerInputComponent->BindAction("FireButton", IE_Pressed, this, &AShooterCharacter::FireButtonPressed);
+	PlayerInputComponent->BindAction("FireButton", IE_Released, this, &AShooterCharacter::FireButtonReleased);
 	PlayerInputComponent->BindAction("AimingButton", IE_Pressed, this, &AShooterCharacter::AimButtonPressed);
 	PlayerInputComponent->BindAction("AimingButton", IE_Released, this, &AShooterCharacter::AimButtonReleased);
 	

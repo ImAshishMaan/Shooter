@@ -31,6 +31,14 @@ protected:
 
 	void AimButtonPressed();
 	void AimButtonReleased();
+
+	void FireButtonPressed();
+	void FireButtonReleased();
+
+	void StartFireTimer();
+	
+	UFUNCTION()
+	void AutoFireReset();
 	
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -104,6 +112,12 @@ private:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	float ZoomInterpSpeed;
+
+	bool bFireButtonPressed;
+	bool bShouldFire;
+
+	float AutomaticFireRate;
+	FTimerHandle AutoFireTimer;
 
 public:
 
