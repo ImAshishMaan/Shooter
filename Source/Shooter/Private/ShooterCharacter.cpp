@@ -35,10 +35,21 @@ AShooterCharacter::AShooterCharacter() {
 	BaseLookUpRate = 45.0f;
 	MuzzleFlashSocket = "BarrelSocket";
 	bAiming = false;
+	
 	CameraDefaultFOV = 0.0f;
 	CameraZoomedFOV = 35.0f;
 	ZoomInterpSpeed = 20.0f;
 	CameraCurrentFOV = 0.0f;
+	
+	HipTurnRate = 90.0f;
+	HipLookUpRate = 90.0f;
+	AimingTurnRate = 20.0f;
+	AimingLookUpRate = 20.0f;
+
+	MouseHipTurnRate = 1.0f;
+	MouseHipLookUpRate = 1.0f;
+	MouseAimingTurnRate = 0.2f;
+	MouseAimingLookUpRate = 0.2f;
 	
 }
 
@@ -55,6 +66,18 @@ void AShooterCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	CameraZoomAim(DeltaTime);
+
+	SetLookRates();
+}
+
+void AShooterCharacter::SetLookRates() {
+	if(bAiming) {
+		BaseTurnRate = AimingTurnRate;
+		BaseLookUpRate = AimingLookUpRate;
+	}else {
+		BaseTurnRate = HipTurnRate;
+		BaseLookUpRate = HipLookUpRate;
+	}
 }
 
 void AShooterCharacter::CameraZoomAim(float DeltaTime) {
@@ -212,4 +235,20 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("AimingButton", IE_Pressed, this, &AShooterCharacter::AimButtonPressed);
 	PlayerInputComponent->BindAction("AimingButton", IE_Released, this, &AShooterCharacter::AimButtonReleased);
 	
+}
+
+void AShooterCharacter::Turn(float Value) {
+	if(bAiming) {
+		AddControllerYawInput(Value * AimingTurnRate);
+	}else {
+		AddControllerYawInput(Value * BaseTurnRate);
+	}
+}
+
+void AShooterCharacter::LookUp(float Value) {
+	if(bAiming) {
+		AddControllerPitchInput(Value * AimingLookUpRate);
+	}else {
+		AddControllerPitchInput(Value * BaseLookUpRate);
+	}
 }
