@@ -12,9 +12,9 @@ AShooterCharacter::AShooterCharacter() {
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 300.0f;
+	CameraBoom->TargetArmLength = 180.0f;
 	CameraBoom->bUsePawnControlRotation = true; // Rotate arm based on controller
-	CameraBoom->SocketOffset = FVector(0.0f, 50.0f, 50.0f);
+	CameraBoom->SocketOffset = FVector(0.0f, 50.0f, 70.0f);
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -34,10 +34,18 @@ AShooterCharacter::AShooterCharacter() {
 	BaseTurnRate = 45.0f;
 	BaseLookUpRate = 45.0f;
 	MuzzleFlashSocket = "BarrelSocket";
+	bAiming = false;
+	CameraDefaultFOV = 0.0f;
+	CameraZoomedFOV = 35.0f;
+	
 }
 
 void AShooterCharacter::BeginPlay() {
 	Super::BeginPlay();
+	
+	if(FollowCamera) {
+		CameraDefaultFOV = FollowCamera->FieldOfView;
+	}
 }
 
 void AShooterCharacter::MoveForward(float Value) {
@@ -86,6 +94,11 @@ void AShooterCharacter::FireWeapon() {
 				if(Beam) {
 					Beam->SetVectorParameter(FName("Target"), BeamEndPoint);
 				}
+			}
+			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+			if(HipFireMontage && AnimInstance) {
+				AnimInstance->Montage_Play(HipFireMontage);
+				AnimInstance->Montage_JumpToSection("StartFire", HipFireMontage);
 			}
 		}
 
@@ -159,6 +172,15 @@ bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, 
 	return false;
 }
 
+void AShooterCharacter::AimButtonPressed() {
+	bAiming = true;
+	FollowCamera->SetFieldOfView(CameraZoomedFOV);
+}
+void AShooterCharacter::AimButtonReleased() {
+	bAiming = false;
+	FollowCamera->SetFieldOfView(CameraDefaultFOV);
+}
+
 void AShooterCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
@@ -175,5 +197,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AShooterCharacter::Jump);
 	PlayerInputComponent->BindAction("FireButton", IE_Pressed, this, &AShooterCharacter::FireWeapon);
+	PlayerInputComponent->BindAction("AimingButton", IE_Pressed, this, &AShooterCharacter::AimButtonPressed);
+	PlayerInputComponent->BindAction("AimingButton", IE_Released, this, &AShooterCharacter::AimButtonReleased);
 	
 }

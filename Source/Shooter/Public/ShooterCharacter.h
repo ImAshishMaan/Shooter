@@ -26,6 +26,9 @@ protected:
 	void FireWeapon();
 
 	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation);
+
+	void AimButtonPressed();
+	void AimButtonReleased();
 	
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -62,6 +65,12 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* HipFireMontage;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	bool bAiming;
+
+	float CameraDefaultFOV;
+	float CameraZoomedFOV;
 
 public:
 
