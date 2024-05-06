@@ -6,7 +6,7 @@
 
 void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime) {
 	if(ShooterCharacter == nullptr) {
-		ShooterCharacter = Cast<AShooterCharacter>(TryGetPawnOwner());
+		ShooterCharacter = Cast<AShooterCharacter>(TryGetPawnOwner()); // TryGetPawnOwner() returns the owning actor.
 	}
 
 	if(ShooterCharacter) {
@@ -25,6 +25,8 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime) {
 		if(ShooterCharacter->GetVelocity().Size() > 0.f) {
 			LastMovementOffsetYaw = MovementOffsetYaw;
 		}
+
+		bAiming = ShooterCharacter->GetAiming();
 		
 	}
 	
