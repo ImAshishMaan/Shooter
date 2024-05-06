@@ -24,6 +24,9 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	void FireWeapon();
+
+	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation);
+	
 public:
 	virtual void Tick(float DeltaTime) override;
 
