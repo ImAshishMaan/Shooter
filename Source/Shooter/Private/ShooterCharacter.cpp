@@ -248,6 +248,8 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("FireButton", IE_Released, this, &AShooterCharacter::FireButtonReleased);
 	PlayerInputComponent->BindAction("AimingButton", IE_Pressed, this, &AShooterCharacter::AimButtonPressed);
 	PlayerInputComponent->BindAction("AimingButton", IE_Released, this, &AShooterCharacter::AimButtonReleased);
+	PlayerInputComponent->BindAction("Select", IE_Pressed, this, &AShooterCharacter::SelectButtonPressed);
+	PlayerInputComponent->BindAction("Select", IE_Released, this, &AShooterCharacter::SelectButtonReleased);
 	
 }
 
@@ -304,17 +306,34 @@ AWeapon* AShooterCharacter::SpawnDefaultWeapon() {
 }
 
 void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip) {
-	if(WeaponToEquip) {
-		
-		WeaponToEquip->GetAreaSphere()->SetCollisionResponseToAllChannels(ECR_Ignore);
-		WeaponToEquip->GetCollisionBox()->SetCollisionResponseToAllChannels(ECR_Ignore);
+	if(WeaponToEquip && WeaponToEquip->GetItemState() == EItemState::EIS_Pickup) {
 		
 		const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("RightHandSocket"));
 		if(HandSocket) {
 			HandSocket->AttachActor(WeaponToEquip, GetMesh());
 		}
 		EquippedWeapon = WeaponToEquip;
+		EquippedWeapon->SetItemState(EItemState::EIS_Equipped);
 	}
+}
+
+void AShooterCharacter::DropWeapon() {
+	if(EquippedWeapon) {
+		FDetachmentTransformRules DetachmentTransformRules(EDetachmentRule::KeepWorld, true);
+		EquippedWeapon->GetItemMesh()->DetachFromComponent(DetachmentTransformRules);
+		
+		EquippedWeapon->SetItemState(EItemState::EIS_Falling);
+		EquippedWeapon->ThrowWeapon();
+	}
+}
+
+void AShooterCharacter::SelectButtonPressed() {
+	if(EquippedWeapon) {
+		DropWeapon();
+	}
+}
+void AShooterCharacter::SelectButtonReleased() {
+	
 }
 
 

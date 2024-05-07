@@ -48,6 +48,11 @@ protected:
 	AWeapon* SpawnDefaultWeapon();
 
 	void EquipWeapon(AWeapon* WeaponToEquip);
+
+	void DropWeapon();
+
+	void SelectButtonPressed();
+	void SelectButtonReleased();
 	
 public:
 	virtual void Tick(float DeltaTime) override;

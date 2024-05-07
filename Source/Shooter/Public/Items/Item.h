@@ -20,6 +20,18 @@ enum class EItemRarity : uint8 {
 	
 };
 
+UENUM(BlueprintType)
+enum class EItemState : uint8 {
+	EIS_Pickup UMETA(DisplayName = "Pickup"),
+	EIS_EquipInterping UMETA(DisplayName = "EquipInterping"),
+	EIS_PickedUp UMETA(DisplayName = "PickedUp"),
+	EIS_Equipped UMETA(DisplayName = "Equipped"),
+	EIS_Falling UMETA(DisplayName = "Falling"),
+
+	EIR_MAX UMETA(DisplayName = "DefaultMAX")
+	
+};
+
 UCLASS()
 class SHOOTER_API AItem : public AActor {
 	GENERATED_BODY()
@@ -37,6 +49,8 @@ protected:
 	void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	void SetActiveStars();
+
+	void SetItemProperties(EItemState State);
 
 private:
 
@@ -64,10 +78,17 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 	TArray<bool> ActiveStars;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	EItemState ItemState;
+
 public:
 
 	FORCEINLINE UWidgetComponent* GetPickUpWidget() const { return PickupWidgetComp; }
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphereComp; }
 	FORCEINLINE UBoxComponent* GetCollisionBox() const { return CollisionBoxComp; }
+	FORCEINLINE EItemState GetItemState() const { return ItemState; }
+	void SetItemState(EItemState State);
+
+	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const { return ItemMeshComp; }
 	
 };
