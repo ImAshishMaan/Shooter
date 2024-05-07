@@ -81,16 +81,16 @@ void AShooterCharacter::TraceForItems() {
 		FVector HitLocation;
 		TraceUnderCrosshairs(ItemTraceRestult, HitLocation);
 		if(ItemTraceRestult.bBlockingHit) {
-			AItem* HitItem = Cast<AItem>(ItemTraceRestult.GetActor());
-			if(HitItem && HitItem->GetPickUpWidget()) {
-				HitItem->GetPickUpWidget()->SetVisibility(true);
+			TraceHitItem = Cast<AItem>(ItemTraceRestult.GetActor());
+			if(TraceHitItem && TraceHitItem->GetPickUpWidget()) {
+				TraceHitItem->GetPickUpWidget()->SetVisibility(true);
 			}
 			if(TraceHitItemLastFrame) {
-				if(HitItem != TraceHitItemLastFrame) {
+				if(TraceHitItem != TraceHitItemLastFrame) {
 					TraceHitItemLastFrame->GetPickUpWidget()->SetVisibility(false);
 				}
 			}
-			TraceHitItemLastFrame = HitItem;
+			TraceHitItemLastFrame = TraceHitItem;
 		}
 	} else if(TraceHitItemLastFrame) {
 		TraceHitItemLastFrame->GetPickUpWidget()->SetVisibility(false);
@@ -328,12 +328,20 @@ void AShooterCharacter::DropWeapon() {
 }
 
 void AShooterCharacter::SelectButtonPressed() {
-	if(EquippedWeapon) {
-		DropWeapon();
+	if(TraceHitItem) {
+		auto TraceHitWeapon = Cast<AWeapon>(TraceHitItem);
+		SwapWeapon(TraceHitWeapon);
 	}
 }
 void AShooterCharacter::SelectButtonReleased() {
 	
+}
+
+void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap) {
+	DropWeapon();
+	EquipWeapon(WeaponToSwap);
+	TraceHitItem = nullptr;
+	TraceHitItemLastFrame = nullptr;
 }
 
 

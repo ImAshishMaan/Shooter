@@ -53,6 +53,8 @@ protected:
 
 	void SelectButtonPressed();
 	void SelectButtonReleased();
+
+	void SwapWeapon(AWeapon* WeaponToSwap);
 	
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -144,6 +146,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AWeapon> DefaultWeaponClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	AItem* TraceHitItem;
 
 public:
 
