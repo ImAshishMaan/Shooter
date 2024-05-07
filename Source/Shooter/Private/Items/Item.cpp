@@ -21,6 +21,9 @@ AItem::AItem() {
 
 	AreaSphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphereComp"));
 	AreaSphereComp->SetupAttachment(RootComponent);
+
+	ItemName = FString("Default");
+	ItemCount = 0;
 	
 }
 
