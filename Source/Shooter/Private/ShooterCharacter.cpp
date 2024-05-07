@@ -62,6 +62,9 @@ AShooterCharacter::AShooterCharacter() {
 	bFireButtonPressed = false;
 
 	bShouldTraceForItems = false;
+
+	CameraInterpDistance = 250.0f;
+	CameraInterpElevation = 65.0f;
 	
 }
 
@@ -329,8 +332,7 @@ void AShooterCharacter::DropWeapon() {
 
 void AShooterCharacter::SelectButtonPressed() {
 	if(TraceHitItem) {
-		auto TraceHitWeapon = Cast<AWeapon>(TraceHitItem);
-		SwapWeapon(TraceHitWeapon);
+		TraceHitItem->StartItemCurve(this);
 	}
 }
 void AShooterCharacter::SelectButtonReleased() {
@@ -352,5 +354,21 @@ void AShooterCharacter::IncrementOverlappedItemCount(int8 Amount) {
 	}else {
 		OverlappedItemCount += Amount;
 		bShouldTraceForItems = true;
+	}
+}
+
+FVector AShooterCharacter::GetCameraInterpLocation() {
+	const FVector CameraWorldLocation { FollowCamera->GetComponentLocation() };
+	const FVector CameraForward { FollowCamera->GetForwardVector() };
+
+	return CameraWorldLocation + CameraForward * CameraInterpDistance + FVector(0.0f, 0.0f, CameraInterpElevation);
+}
+
+void AShooterCharacter::GetPickUpItem(AItem* Item) {
+	auto Weapon = Cast<AWeapon>(Item);
+	if(Weapon) {
+		SwapWeapon(Weapon);
+	}else {
+		// consumable item logic
 	}
 }

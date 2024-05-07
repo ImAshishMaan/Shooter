@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Item.generated.h"
 
+class AShooterCharacter;
 class USphereComponent;
 class UWidgetComponent;
 class UBoxComponent;
@@ -52,6 +53,10 @@ protected:
 
 	void SetItemProperties(EItemState State);
 
+	void FinishInterping();
+
+	void ItemInterp(float DeltaTime);
+
 private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
@@ -81,6 +86,29 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 	EItemState ItemState;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* ItemZCurve;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	FVector ItemInterpStartLocation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	FVector CameraTargetLocation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	bool bInterping;
+
+	FTimerHandle ItemInterpTimer;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	AShooterCharacter* Character;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	float ZCurveTime;
+
+	float ItemInterpX;
+	float ItemInterpY;
+
 public:
 
 	FORCEINLINE UWidgetComponent* GetPickUpWidget() const { return PickupWidgetComp; }
@@ -90,5 +118,7 @@ public:
 	void SetItemState(EItemState State);
 
 	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const { return ItemMeshComp; }
+
+	void StartItemCurve(AShooterCharacter* Shooter);
 	
 };

@@ -26,6 +26,14 @@ AItem::AItem() {
 	ItemCount = 0;
 	ItemRarity = EItemRarity::EIR_Common;
 	ItemState = EItemState::EIS_Pickup;
+
+	ZCurveTime = 0.7f;
+	ItemInterpStartLocation = FVector(0.f);
+	CameraTargetLocation = FVector(0.f);
+	bInterping = false;
+
+	ItemInterpX = 0.f;
+	ItemInterpY = 0.f;
 	
 }
 
@@ -145,14 +153,79 @@ void AItem::SetItemProperties(EItemState State) {
 		CollisionBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 		CollisionBoxComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		break;
+	case EItemState::EIS_EquipInterping:
+		PickupWidgetComp->SetVisibility(false);
+		
+		ItemMeshComp->SetSimulatePhysics(false);
+		ItemMeshComp->SetEnableGravity(false);
+		ItemMeshComp->SetVisibility(true);
+		ItemMeshComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		ItemMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		AreaSphereComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+		AreaSphereComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		CollisionBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+		CollisionBoxComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+			
 	}
 }
+
 
 void AItem::SetItemState(EItemState State) {
 	ItemState = State;
 	SetItemProperties(ItemState);	
 }
 
+void AItem::StartItemCurve(AShooterCharacter* Shooter) {
+	Character = Shooter;
+	ItemInterpStartLocation = GetActorLocation();
+	bInterping = true;
+	
+	GetWorldTimerManager().SetTimer(
+		ItemInterpTimer,
+		this,
+		&AItem::FinishInterping,
+		ZCurveTime
+	);
+
+}
+
+void AItem::FinishInterping() {
+	bInterping = false;
+	if(Character) {
+		Character->GetPickUpItem(this);
+	}
+}
+
+void AItem::ItemInterp(float DeltaTime) {
+	if(!bInterping) return;
+	
+	if(Character && ItemZCurve) {
+		
+		const float ElapsedTime = GetWorldTimerManager().GetTimerElapsed(ItemInterpTimer);
+		const float CurveValue = ItemZCurve->GetFloatValue(ElapsedTime);
+		FVector ItemLocation = ItemInterpStartLocation;
+		const FVector CameraInterpLocation = Character->GetCameraInterpLocation();
+		const FVector ItemToCamera { FVector(0.f, 0.f, (CameraInterpLocation - ItemLocation).Z) };
+		const float DeltaZ = ItemToCamera.Size();
+
+		const FVector CurrentLocation { GetActorLocation() };
+		const float InterpXValue = FMath::FInterpTo(CurrentLocation.X, CameraInterpLocation.X, DeltaTime, 30.f);
+		const float InterpYValue = FMath::FInterpTo(CurrentLocation.Y, CameraInterpLocation.Y, DeltaTime, 30.f);
+
+		ItemLocation.X = InterpXValue;
+		ItemLocation.Y = InterpYValue;
+
+		ItemLocation.Z += CurveValue * DeltaZ; 
+		SetActorLocation(ItemLocation, true, nullptr, ETeleportType::TeleportPhysics);
+		
+	}
+}
+
 void AItem::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+	
+	ItemInterp(DeltaTime);
 }
