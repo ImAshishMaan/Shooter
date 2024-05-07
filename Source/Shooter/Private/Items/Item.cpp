@@ -11,14 +11,20 @@ AItem::AItem() {
 	
 	CollisionBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBoxComp"));
 	CollisionBoxComp->SetupAttachment(ItemMeshComp);
+	CollisionBoxComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	CollisionBoxComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 
 	PickupWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidgetComp"));
-	PickupWidgetComp->SetupAttachment(Get);
+	PickupWidgetComp->SetupAttachment(RootComponent);
 	
 }
 
 void AItem::BeginPlay() {
 	Super::BeginPlay();
+
+	// Hide widget
+	PickupWidgetComp->SetVisibility(false);
+	
 }
 
 void AItem::Tick(float DeltaTime) {

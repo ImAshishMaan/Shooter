@@ -30,5 +30,7 @@ private:
 	UWidgetComponent* PickupWidgetComp;
 
 public:
+
+	FORCEINLINE UWidgetComponent* GetPickUpWidget() const { return PickupWidgetComp; }
 	
 };
