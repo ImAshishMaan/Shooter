@@ -67,5 +67,7 @@ private:
 public:
 
 	FORCEINLINE UWidgetComponent* GetPickUpWidget() const { return PickupWidgetComp; }
+	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphereComp; }
+	FORCEINLINE UBoxComponent* GetCollisionBox() const { return CollisionBoxComp; }
 	
 };

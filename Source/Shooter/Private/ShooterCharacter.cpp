@@ -1,6 +1,8 @@
 #include "Shooter/Public/ShooterCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -70,8 +72,7 @@ void AShooterCharacter::BeginPlay() {
 		CameraDefaultFOV = FollowCamera->FieldOfView;
 		CameraCurrentFOV = CameraDefaultFOV;
 	}
-
-	SpawnDefaultWeapon();
+	EquipWeapon(SpawnDefaultWeapon());
 }
 
 void AShooterCharacter::TraceForItems() {
@@ -295,14 +296,24 @@ bool AShooterCharacter::TraceUnderCrosshairs(FHitResult& OutHitResult, FVector& 
 	return false;
 }
 
-void AShooterCharacter::SpawnDefaultWeapon() {
+AWeapon* AShooterCharacter::SpawnDefaultWeapon() {
 	if(DefaultWeaponClass) {
-		AWeapon* DefaultWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
+		return GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
+	}
+	return nullptr;
+}
+
+void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip) {
+	if(WeaponToEquip) {
+		
+		WeaponToEquip->GetAreaSphere()->SetCollisionResponseToAllChannels(ECR_Ignore);
+		WeaponToEquip->GetCollisionBox()->SetCollisionResponseToAllChannels(ECR_Ignore);
+		
 		const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("RightHandSocket"));
 		if(HandSocket) {
-			HandSocket->AttachActor(DefaultWeapon, GetMesh());
+			HandSocket->AttachActor(WeaponToEquip, GetMesh());
 		}
-		EquippedWeapon = DefaultWeapon;
+		EquippedWeapon = WeaponToEquip;
 	}
 }
 

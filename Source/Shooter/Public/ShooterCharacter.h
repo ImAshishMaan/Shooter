@@ -45,7 +45,9 @@ protected:
 
 	bool TraceUnderCrosshairs(FHitResult& OutHitResult, FVector& OutHitLocation);
 
-	void SpawnDefaultWeapon();
+	AWeapon* SpawnDefaultWeapon();
+
+	void EquipWeapon(AWeapon* WeaponToEquip);
 	
 public:
 	virtual void Tick(float DeltaTime) override;
