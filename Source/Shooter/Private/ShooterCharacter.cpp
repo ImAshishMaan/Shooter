@@ -2,9 +2,11 @@
 
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Items/Item.h"
+#include "Items/Weapon.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
@@ -68,6 +70,8 @@ void AShooterCharacter::BeginPlay() {
 		CameraDefaultFOV = FollowCamera->FieldOfView;
 		CameraCurrentFOV = CameraDefaultFOV;
 	}
+
+	SpawnDefaultWeapon();
 }
 
 void AShooterCharacter::TraceForItems() {
@@ -289,6 +293,17 @@ bool AShooterCharacter::TraceUnderCrosshairs(FHitResult& OutHitResult, FVector& 
 	}
 
 	return false;
+}
+
+void AShooterCharacter::SpawnDefaultWeapon() {
+	if(DefaultWeaponClass) {
+		AWeapon* DefaultWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
+		const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("RightHandSocket"));
+		if(HandSocket) {
+			HandSocket->AttachActor(DefaultWeapon, GetMesh());
+		}
+		EquippedWeapon = DefaultWeapon;
+	}
 }
 
 
