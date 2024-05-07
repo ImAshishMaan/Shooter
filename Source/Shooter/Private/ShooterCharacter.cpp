@@ -56,6 +56,8 @@ AShooterCharacter::AShooterCharacter() {
 	AutomaticFireRate = 0.1f;
 	bShouldFire = true;
 	bFireButtonPressed = false;
+
+	bShouldTraceForItems = false;
 	
 }
 
@@ -68,23 +70,35 @@ void AShooterCharacter::BeginPlay() {
 	}
 }
 
+void AShooterCharacter::TraceForItems() {
+	if(bShouldTraceForItems) {
+		FHitResult ItemTraceRestult;
+		FVector HitLocation;
+		TraceUnderCrosshairs(ItemTraceRestult, HitLocation);
+		if(ItemTraceRestult.bBlockingHit) {
+			AItem* HitItem = Cast<AItem>(ItemTraceRestult.GetActor());
+			if(HitItem && HitItem->GetPickUpWidget()) {
+				HitItem->GetPickUpWidget()->SetVisibility(true);
+			}
+			if(TraceHitItemLastFrame) {
+				if(HitItem != TraceHitItemLastFrame) {
+					TraceHitItemLastFrame->GetPickUpWidget()->SetVisibility(false);
+				}
+			}
+			TraceHitItemLastFrame = HitItem;
+		}
+	} else if(TraceHitItemLastFrame) {
+		TraceHitItemLastFrame->GetPickUpWidget()->SetVisibility(false);
+	}
+}
+
 void AShooterCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	CameraZoomAim(DeltaTime);
 
 	SetLookRates();
-
-	FHitResult ItemTraceRestult;
-	FVector HitLocation;
-	TraceUnderCrosshairs(ItemTraceRestult, HitLocation);
-	if(ItemTraceRestult.bBlockingHit) {
-		AItem* HitItem = Cast<AItem>(ItemTraceRestult.GetActor());
-		if(HitItem && HitItem->GetPickUpWidget()) {
-			HitItem->GetPickUpWidget()->SetVisibility(true);
-			
-		}
-	}
+	TraceForItems();
 }
 
 void AShooterCharacter::SetLookRates() {
@@ -275,4 +289,15 @@ bool AShooterCharacter::TraceUnderCrosshairs(FHitResult& OutHitResult, FVector& 
 	}
 
 	return false;
+}
+
+
+void AShooterCharacter::IncrementOverlappedItemCount(int8 Amount) {
+	if(OverlappedItemCount + Amount <= 0) {
+		OverlappedItemCount = 0;
+		bShouldTraceForItems = false;
+	}else {
+		OverlappedItemCount += Amount;
+		bShouldTraceForItems = true;
+	}
 }

@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "ShooterCharacter.generated.h"
 
+class AItem;
 class USoundCue;
 class UCameraComponent;
 class USpringArmComponent;
@@ -17,6 +18,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	void TraceForItems();
 	void SetLookRates();
 	void CameraZoomAim(float DeltaTime);
 
@@ -121,9 +123,19 @@ private:
 	float AutomaticFireRate;
 	FTimerHandle AutoFireTimer;
 
+	bool bShouldTraceForItems;
+	int8 OverlappedItemCount;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))
+	AItem* TraceHitItemLastFrame;
+
 public:
 
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE bool GetAiming() const { return bAiming; }
+
+	FORCEINLINE int8 GetOverlappedItemCount() const { return OverlappedItemCount; }
+
+	void IncrementOverlappedItemCount(int8 Amount);
 	
 };

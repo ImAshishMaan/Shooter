@@ -1,6 +1,8 @@
 #include "Items/Item.h"
 
+#include "ShooterCharacter.h"
 #include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 
 AItem::AItem() {
@@ -16,15 +18,42 @@ AItem::AItem() {
 
 	PickupWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidgetComp"));
 	PickupWidgetComp->SetupAttachment(RootComponent);
+
+	AreaSphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphereComp"));
+	AreaSphereComp->SetupAttachment(RootComponent);
 	
 }
 
 void AItem::BeginPlay() {
 	Super::BeginPlay();
+	PickupWidgetComp->SetVisibility(false);
 
 	// Hide widget
-	PickupWidgetComp->SetVisibility(false);
+	AreaSphereComp->OnComponentBeginOverlap.AddDynamic(this, &AItem::OnSphereOverlapBegin);
+	AreaSphereComp->OnComponentEndOverlap.AddDynamic(this, &AItem::OnSphereEndOverlap);
 	
+}
+
+void AItem::OnSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+
+	if(OtherActor) {
+		AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(OtherActor);
+		if(ShooterCharacter) {
+			ShooterCharacter->IncrementOverlappedItemCount(1);
+		}
+	}
+}
+
+void AItem::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
+	
+	if(OtherActor) {
+		AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(OtherActor);
+		if(ShooterCharacter) {
+			ShooterCharacter->IncrementOverlappedItemCount(-1);
+		}
+	}
 }
 
 void AItem::Tick(float DeltaTime) {
