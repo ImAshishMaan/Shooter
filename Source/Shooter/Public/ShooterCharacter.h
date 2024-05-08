@@ -18,6 +18,16 @@ enum class EAmmoType : uint8 {
 	EAT_MAX UMETA(DisplayName = "DefaultMAX")
 };
 
+UENUM(BlueprintType)
+enum class ECombatState : uint8 {
+	ECS_Unoccupied UMETA(DisplayName = "Unoccupied"),
+	ECS_FireTimerInProgress UMETA(DisplayName = "FireTimerInProgress"),
+	ECS_Reloading UMETA(DisplayName = "Reloading"),
+
+	ECS_MAX UMETA(DisplayName = "DefaultMAX")
+	
+};
+
 UCLASS()
 class SHOOTER_API AShooterCharacter : public ACharacter {
 	GENERATED_BODY()
@@ -35,6 +45,9 @@ protected:
 	void MoveRight(float Value);
 	void TurnAtRate(float Rate); 
 	void LookUpAtRate(float Rate);
+	void PlayFireSound();
+	void PlayGunFireMontage();
+	void SendBullet();
 
 	void FireWeapon();
 
@@ -65,6 +78,8 @@ protected:
 	void SwapWeapon(AWeapon* WeaponToSwap);
 
 	void InitializeAmmoMap();
+
+	bool WeaponHasAmmo();
 
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -173,6 +188,9 @@ private:
 	int32 Starting9mmAmmo;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Items", meta = (AllowPrivateAccess = "true"))
 	int32 StartingARAmmo;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	ECombatState CombatState;
 
 public:
 
