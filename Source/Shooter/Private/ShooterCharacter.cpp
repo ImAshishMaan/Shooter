@@ -65,7 +65,10 @@ AShooterCharacter::AShooterCharacter() {
 
 	CameraInterpDistance = 250.0f;
 	CameraInterpElevation = 65.0f;
-	
+
+	Starting9mmAmmo = 85;
+	StartingARAmmo = 120;
+
 }
 
 void AShooterCharacter::BeginPlay() {
@@ -76,6 +79,8 @@ void AShooterCharacter::BeginPlay() {
 		CameraCurrentFOV = CameraDefaultFOV;
 	}
 	EquipWeapon(SpawnDefaultWeapon());
+	
+	InitializeAmmoMap();
 }
 
 void AShooterCharacter::TraceForItems() {
@@ -344,6 +349,11 @@ void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap) {
 	EquipWeapon(WeaponToSwap);
 	TraceHitItem = nullptr;
 	TraceHitItemLastFrame = nullptr;
+}
+
+void AShooterCharacter::InitializeAmmoMap() {
+	AmmoMap.Add(EAmmoType::EAT_9mm, Starting9mmAmmo);
+	AmmoMap.Add(EAmmoType::EAT_AR, StartingARAmmo);
 }
 
 
