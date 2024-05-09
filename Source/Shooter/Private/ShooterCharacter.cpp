@@ -1,8 +1,5 @@
 #include "Shooter/Public/ShooterCharacter.h"
-
 #include "Camera/CameraComponent.h"
-#include "Components/BoxComponent.h"
-#include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -11,6 +8,7 @@
 #include "Items/Weapon.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Shooter/AmmoType.h"
 #include "Sound/SoundCue.h"
 
 AShooterCharacter::AShooterCharacter() {
@@ -261,7 +259,7 @@ void AShooterCharacter::AutoFireReset() {
 			FireWeapon();
 		}
 	}else {
-		// Reload Weapon logic
+		ReloadWeapon();
 	}
 }
 
@@ -282,6 +280,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("AimingButton", IE_Released, this, &AShooterCharacter::AimButtonReleased);
 	PlayerInputComponent->BindAction("Select", IE_Pressed, this, &AShooterCharacter::SelectButtonPressed);
 	PlayerInputComponent->BindAction("Select", IE_Released, this, &AShooterCharacter::SelectButtonReleased);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &AShooterCharacter::ReloadButtonPressed);
 	
 }
 
@@ -386,6 +385,59 @@ bool AShooterCharacter::WeaponHasAmmo() {
 	return EquippedWeapon->GetAmmo() > 0;
 }
 
+void AShooterCharacter::ReloadButtonPressed() {
+	ReloadWeapon();
+}
+
+void AShooterCharacter::ReloadWeapon() {
+	if(CombatState != ECombatState::ECS_Unoccupied) return;
+	if(EquippedWeapon == nullptr) return;
+
+	if(CarryingAmmo()) {
+		CombatState = ECombatState::ECS_Reloading;
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if(AnimInstance && ReloadAnimMontage) {
+			AnimInstance->Montage_Play(ReloadAnimMontage);
+			AnimInstance->Montage_JumpToSection(EquippedWeapon->GetReloadMontageSection(), ReloadAnimMontage);
+		}
+	}
+	
+}
+
+bool AShooterCharacter::CarryingAmmo() {
+	if(EquippedWeapon == nullptr) return false;
+	
+	auto AmmoType = EquippedWeapon->GetAmmoType();
+	if(AmmoMap.Contains(AmmoType)) {
+		return AmmoMap[AmmoType] > 0;
+	}
+	return false;
+}
+
+
+void AShooterCharacter::FinishReloading() {
+	CombatState = ECombatState::ECS_Unoccupied;
+	if(EquippedWeapon == nullptr) return;
+
+	const auto AmmoType = EquippedWeapon->GetAmmoType();
+	
+	// Update ammo map
+	if(AmmoMap.Contains(EquippedWeapon->GetAmmoType())) {
+		int32 CurrentAmmo = AmmoMap[AmmoType];
+		const int32 MagEmptySpace = EquippedWeapon->GetMagazineCapacity() - EquippedWeapon->GetAmmo();
+		if(MagEmptySpace > CurrentAmmo) {
+			// Reload the mag with all the ammo
+			EquippedWeapon->ReloadAmmo(CurrentAmmo);
+			CurrentAmmo = 0;
+			AmmoMap.Add(AmmoType, CurrentAmmo);
+		}else {
+			// fill the mag
+			EquippedWeapon->ReloadAmmo(MagEmptySpace);
+			CurrentAmmo -= MagEmptySpace;
+			AmmoMap.Add(AmmoType, CurrentAmmo);
+		}
+	}
+}
 
 void AShooterCharacter::IncrementOverlappedItemCount(int8 Amount) {
 	if(OverlappedItemCount + Amount <= 0) {

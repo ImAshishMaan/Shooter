@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Shooter/AmmoType.h"
 #include "ShooterCharacter.generated.h"
 
 class AWeapon;
@@ -9,14 +10,6 @@ class AItem;
 class USoundCue;
 class UCameraComponent;
 class USpringArmComponent;
-
-UENUM(BlueprintType)
-enum class EAmmoType : uint8 {
-	EAT_9mm UMETA(DisplayName = "9mm"),
-	EAT_AR UMETA(DisplayName = "AssaultRifle"),
-
-	EAT_MAX UMETA(DisplayName = "DefaultMAX")
-};
 
 UENUM(BlueprintType)
 enum class ECombatState : uint8 {
@@ -80,6 +73,12 @@ protected:
 	void InitializeAmmoMap();
 
 	bool WeaponHasAmmo();
+
+	void ReloadButtonPressed();
+
+	void ReloadWeapon();
+
+	bool CarryingAmmo();
 
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -191,6 +190,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	ECombatState CombatState;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* ReloadAnimMontage;
+
+	UFUNCTION(BlueprintCallable)
+	void FinishReloading();
 
 public:
 
