@@ -4,6 +4,7 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Items/Ammo.h"
 #include "Items/Item.h"
 #include "Items/Weapon.h"
 #include "Kismet/GameplayStatics.h"
@@ -456,11 +457,30 @@ FVector AShooterCharacter::GetCameraInterpLocation() {
 	return CameraWorldLocation + CameraForward * CameraInterpDistance + FVector(0.0f, 0.0f, CameraInterpElevation);
 }
 
+void AShooterCharacter::PickUpAmmo(AAmmo* Ammo) {
+	if(AmmoMap.Find(Ammo->GetAmmoType())) {
+		int32 AmmoCount = AmmoMap[Ammo->GetAmmoType()];
+		AmmoCount += Ammo->GetItemCount();
+		AmmoMap[Ammo->GetAmmoType()] = AmmoCount;
+	}
+
+	if(EquippedWeapon->GetAmmoType() == Ammo->GetAmmoType()) {
+		if(EquippedWeapon->GetAmmo() == 0) {
+			ReloadWeapon();
+		}
+	}
+
+	Ammo->Destroy();
+}
+
 void AShooterCharacter::GetPickUpItem(AItem* Item) {
 	auto Weapon = Cast<AWeapon>(Item);
 	if(Weapon) {
 		SwapWeapon(Weapon);
-	}else {
-		// consumable item logic
+	}
+
+	auto Ammo = Cast<AAmmo>(Item);
+	if(Ammo) {
+		PickUpAmmo(Ammo);
 	}
 }

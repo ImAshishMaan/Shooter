@@ -51,7 +51,7 @@ protected:
 
 	void SetActiveStars();
 
-	void SetItemProperties(EItemState State);
+	virtual void SetItemProperties(EItemState State);
 
 	void FinishInterping();
 
@@ -116,6 +116,7 @@ public:
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphereComp; }
 	FORCEINLINE UBoxComponent* GetCollisionBox() const { return CollisionBoxComp; }
 	FORCEINLINE EItemState GetItemState() const { return ItemState; }
+	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
 	void SetItemState(EItemState State);
 
 	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const { return ItemMeshComp; }

@@ -10,6 +10,7 @@ class AItem;
 class USoundCue;
 class UCameraComponent;
 class USpringArmComponent;
+class AAmmo;
 
 UENUM(BlueprintType)
 enum class ECombatState : uint8 {
@@ -79,6 +80,8 @@ protected:
 	void ReloadWeapon();
 
 	bool CarryingAmmo();
+
+	void PickUpAmmo(AAmmo* Ammo);
 
 public:
 	virtual void Tick(float DeltaTime) override;
