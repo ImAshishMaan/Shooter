@@ -180,6 +180,12 @@ void AItem::SetItemState(EItemState State) {
 
 void AItem::StartItemCurve(AShooterCharacter* Shooter) {
 	Character = Shooter;
+
+	//Pick upSound
+	/*if(PickupSound) {
+		UGameplayStatics::PlaySound2D(this, PickupSound);
+	}*/
+	
 	ItemInterpStartLocation = GetActorLocation();
 	bInterping = true;
 	
