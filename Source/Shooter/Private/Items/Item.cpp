@@ -34,6 +34,9 @@ AItem::AItem() {
 
 	ItemInterpX = 0.f;
 	ItemInterpY = 0.f;
+	MaterialIndex = 0;
+	
+	bCanChangeCustomDepth = true;
 	
 }
 
@@ -48,6 +51,14 @@ void AItem::BeginPlay() {
 	AreaSphereComp->OnComponentEndOverlap.AddDynamic(this, &AItem::OnSphereEndOverlap);
 
 	SetItemProperties(ItemState);
+
+	InitializeCustomDepth();
+}
+
+void AItem::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+	
+	ItemInterp(DeltaTime);
 }
 
 void AItem::OnSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -196,6 +207,7 @@ void AItem::StartItemCurve(AShooterCharacter* Shooter) {
 		ZCurveTime
 	);
 
+	bCanChangeCustomDepth = false;
 }
 
 void AItem::FinishInterping() {
@@ -203,6 +215,10 @@ void AItem::FinishInterping() {
 	if(Character) {
 		Character->GetPickUpItem(this);
 	}
+	DisableGlobeMaterial();
+	bCanChangeCustomDepth = true;
+	DisableCustomDepth();
+
 }
 
 void AItem::ItemInterp(float DeltaTime) {
@@ -230,8 +246,38 @@ void AItem::ItemInterp(float DeltaTime) {
 	}
 }
 
-void AItem::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
-	
-	ItemInterp(DeltaTime);
+void AItem::EnableCustomDepth() {
+	if(bCanChangeCustomDepth)
+		ItemMeshComp->SetRenderCustomDepth(true);
 }
+
+void AItem::DisableCustomDepth() {
+	if(bCanChangeCustomDepth)
+		ItemMeshComp->SetRenderCustomDepth(false);
+}
+
+void AItem::InitializeCustomDepth() {
+	DisableCustomDepth();
+}
+
+void AItem::OnConstruction(const FTransform& Transform) {
+	Super::OnConstruction(Transform);
+	if(MaterialInstance) {
+		DynamicMaterialInstance = UMaterialInstanceDynamic::Create(MaterialInstance, this);
+		ItemMeshComp->SetMaterial(MaterialIndex, DynamicMaterialInstance);
+	}
+	EnableGlobeMaterial();
+}
+
+void AItem::EnableGlobeMaterial() {
+	if(DynamicMaterialInstance) {
+		DynamicMaterialInstance->SetScalarParameterValue("GlowBlendAlpha", 0.f);
+	}
+}
+void AItem::DisableGlobeMaterial() {
+	if(DynamicMaterialInstance) {
+		DynamicMaterialInstance->SetScalarParameterValue("GlowBlendAlpha", 1.f);
+	}
+}
+
+

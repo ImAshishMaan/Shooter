@@ -93,16 +93,19 @@ void AShooterCharacter::TraceForItems() {
 			TraceHitItem = Cast<AItem>(ItemTraceRestult.GetActor());
 			if(TraceHitItem && TraceHitItem->GetPickUpWidget()) {
 				TraceHitItem->GetPickUpWidget()->SetVisibility(true);
+				TraceHitItem->EnableCustomDepth();
 			}
 			if(TraceHitItemLastFrame) {
 				if(TraceHitItem != TraceHitItemLastFrame) {
 					TraceHitItemLastFrame->GetPickUpWidget()->SetVisibility(false);
+					TraceHitItemLastFrame->DisableCustomDepth();
 				}
 			}
 			TraceHitItemLastFrame = TraceHitItem;
 		}
 	} else if(TraceHitItemLastFrame) {
 		TraceHitItemLastFrame->GetPickUpWidget()->SetVisibility(false);
+		TraceHitItemLastFrame->DisableCustomDepth();
 	}
 }
 
