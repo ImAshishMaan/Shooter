@@ -40,7 +40,7 @@ void AWeapon::ThrowWeapon() {
 
 	GetWorldTimerManager().SetTimer(ThrowWeaponTimer, this, &AWeapon::StopFalling, ThrowWeaponTime);
 
-	EnableGlobeMaterial();
+	EnableGlowMaterial();
 	
 }
 
@@ -60,4 +60,5 @@ void AWeapon::ReloadAmmo(int32 Amount) {
 void AWeapon::StopFalling() {
 	bFalling = false;
 	SetItemState(EItemState::EIS_Pickup);
+	StartPulseTimer();
 }

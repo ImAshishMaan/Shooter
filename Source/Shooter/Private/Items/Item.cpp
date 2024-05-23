@@ -4,6 +4,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Curves/CurveVector.h"
 
 AItem::AItem() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -37,6 +38,11 @@ AItem::AItem() {
 	MaterialIndex = 0;
 	
 	bCanChangeCustomDepth = true;
+
+	GlowAmount = 150.f;
+	FresnelExponent = 3.f;
+	FresnelReflectFraction = 4.f;
+	PulseCurveTime = 5.f;
 	
 }
 
@@ -53,12 +59,15 @@ void AItem::BeginPlay() {
 	SetItemProperties(ItemState);
 
 	InitializeCustomDepth();
+
+	StartPulseTimer();
 }
 
 void AItem::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	
 	ItemInterp(DeltaTime);
+	UpdatePulse();
 }
 
 void AItem::OnSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -184,6 +193,16 @@ void AItem::SetItemProperties(EItemState State) {
 }
 
 
+void AItem::ResetPulseTimer() {
+	StartPulseTimer();
+}
+
+void AItem::StartPulseTimer() {
+	if(ItemState == EItemState::EIS_Pickup) {
+		GetWorldTimerManager().SetTimer(PulseTimer, this, &AItem::ResetPulseTimer, PulseCurveTime);
+	}
+}
+
 void AItem::SetItemState(EItemState State) {
 	ItemState = State;
 	SetItemProperties(ItemState);	
@@ -199,6 +218,8 @@ void AItem::StartItemCurve(AShooterCharacter* Shooter) {
 	
 	ItemInterpStartLocation = GetActorLocation();
 	bInterping = true;
+	SetItemState(EItemState::EIS_EquipInterping);
+	GetWorldTimerManager().ClearTimer(PulseTimer);
 	
 	GetWorldTimerManager().SetTimer(
 		ItemInterpTimer,
@@ -214,8 +235,9 @@ void AItem::FinishInterping() {
 	bInterping = false;
 	if(Character) {
 		Character->GetPickUpItem(this);
+		SetItemState(EItemState::EIS_Pickup);
 	}
-	DisableGlobeMaterial();
+	DisableGlowMaterial();
 	bCanChangeCustomDepth = true;
 	DisableCustomDepth();
 
@@ -266,15 +288,40 @@ void AItem::OnConstruction(const FTransform& Transform) {
 		DynamicMaterialInstance = UMaterialInstanceDynamic::Create(MaterialInstance, this);
 		ItemMeshComp->SetMaterial(MaterialIndex, DynamicMaterialInstance);
 	}
-	EnableGlobeMaterial();
+	EnableGlowMaterial();
 }
 
-void AItem::EnableGlobeMaterial() {
+void AItem::EnableGlowMaterial() {
 	if(DynamicMaterialInstance) {
 		DynamicMaterialInstance->SetScalarParameterValue("GlowBlendAlpha", 0.f);
 	}
 }
-void AItem::DisableGlobeMaterial() {
+
+void AItem::UpdatePulse() {
+	float ElapsedTime{};
+	FVector CurveValue{};
+	switch(ItemState) {
+		case EItemState::EIS_Pickup:
+			if(PulseCurve) {
+				ElapsedTime = GetWorldTimerManager().GetTimerElapsed(PulseTimer);
+				CurveValue = PulseCurve->GetVectorValue(ElapsedTime);
+			}
+			break;
+		case EItemState::EIS_EquipInterping:
+			if(InterpPulseCurve) {
+				ElapsedTime = GetWorldTimerManager().GetTimerElapsed(ItemInterpTimer);
+				CurveValue = InterpPulseCurve->GetVectorValue(ElapsedTime);
+			}
+			break;
+	}
+	if(DynamicMaterialInstance) {
+		DynamicMaterialInstance->SetScalarParameterValue("GlowAmount", CurveValue.X * GlowAmount);
+		DynamicMaterialInstance->SetScalarParameterValue("FresnelExponent", CurveValue.Y * FresnelExponent);
+		DynamicMaterialInstance->SetScalarParameterValue("FresnelReflectFraction", CurveValue.Z * FresnelReflectFraction);
+	}
+}
+
+void AItem::DisableGlowMaterial() {
 	if(DynamicMaterialInstance) {
 		DynamicMaterialInstance->SetScalarParameterValue("GlowBlendAlpha", 1.f);
 	}

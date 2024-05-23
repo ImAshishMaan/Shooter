@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Item.generated.h"
 
+class UCurveVector;
 class AShooterCharacter;
 class USphereComponent;
 class UWidgetComponent;
@@ -61,9 +62,12 @@ protected:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	void EnableGlobeMaterial();
+	void EnableGlowMaterial();
 
-	void DisableGlobeMaterial();
+	void UpdatePulse();
+	void ResetPulseTimer();
+	void StartPulseTimer();
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* CollisionBoxComp;
@@ -129,6 +133,28 @@ private:
 
 	bool bCanChangeCustomDepth;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	UCurveVector* PulseCurve;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	UCurveVector* InterpPulseCurve;
+
+	FTimerHandle PulseTimer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	float PulseCurveTime;
+
+	UPROPERTY(VisibleAnywhere, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	float GlowAmount;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	float FresnelExponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	float FresnelReflectFraction;
+
+	
+
 public:
 
 	FORCEINLINE UWidgetComponent* GetPickUpWidget() const { return PickupWidgetComp; }
@@ -144,5 +170,7 @@ public:
 
 	virtual void EnableCustomDepth();
 	virtual void DisableCustomDepth();
+	void DisableGlowMaterial();
+
 	
 };
