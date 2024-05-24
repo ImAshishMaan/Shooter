@@ -344,14 +344,15 @@ AWeapon* AShooterCharacter::SpawnDefaultWeapon() {
 }
 
 void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip) {
-	if(WeaponToEquip && WeaponToEquip->GetItemState() == EItemState::EIS_Pickup) {
-		
+	if(WeaponToEquip) {
 		const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("RightHandSocket"));
 		if(HandSocket) {
 			HandSocket->AttachActor(WeaponToEquip, GetMesh());
 		}
 		EquippedWeapon = WeaponToEquip;
 		EquippedWeapon->SetItemState(EItemState::EIS_Equipped);
+	}else {
+		UE_LOG(LogTemp, Warning, TEXT("Weapon to equip is nullptr!"));		
 	}
 }
 
