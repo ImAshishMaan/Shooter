@@ -43,6 +43,8 @@ AItem::AItem() {
 	FresnelExponent = 3.f;
 	FresnelReflectFraction = 4.f;
 	PulseCurveTime = 5.f;
+
+	SlotIndex = 0;
 	
 }
 
@@ -188,6 +190,23 @@ void AItem::SetItemProperties(EItemState State) {
 		CollisionBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 		CollisionBoxComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		break;
+
+	case EItemState::EIS_PickedUp:
+		PickupWidgetComp->SetVisibility(false);
+		
+		ItemMeshComp->SetSimulatePhysics(false);
+		ItemMeshComp->SetVisibility(false);
+		ItemMeshComp->SetEnableGravity(false);
+		ItemMeshComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		ItemMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		AreaSphereComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+		AreaSphereComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		
+		CollisionBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+		CollisionBoxComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+			
 			
 	}
 }

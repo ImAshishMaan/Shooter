@@ -81,6 +81,7 @@ void AShooterCharacter::BeginPlay() {
 	}
 	EquipWeapon(SpawnDefaultWeapon());
 	Inventory.Add(EquippedWeapon);
+	EquippedWeapon->SetSlotIndex(0);
 	
 	EquippedWeapon->DisableCustomDepth();
 	EquippedWeapon->DisableGlowMaterial(); 
@@ -350,6 +351,14 @@ void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip) {
 		if(HandSocket) {
 			HandSocket->AttachActor(WeaponToEquip, GetMesh());
 		}
+
+		if(EquippedWeapon == nullptr) {
+			// -1 = no equipped weapon
+			EquipItemDelegate.Broadcast(-1, WeaponToEquip->GetSlotIndex());
+		} else {
+			EquipItemDelegate.Broadcast(EquippedWeapon->GetSlotIndex(), WeaponToEquip->GetSlotIndex());
+		}
+		
 		EquippedWeapon = WeaponToEquip;
 		EquippedWeapon->SetItemState(EItemState::EIS_Equipped);
 	}else {
@@ -485,7 +494,9 @@ void AShooterCharacter::GetPickUpItem(AItem* Item) {
 	auto Weapon = Cast<AWeapon>(Item);
 	if(Weapon) {
 		if(Inventory.Num() < INVENTORY_CAPACITY) {
+			Weapon->SetSlotIndex(Inventory.Num());
 			Inventory.Add(Weapon);
+			Weapon->SetItemState(EItemState::EIS_PickedUp);
 		}else {
 			SwapWeapon(Weapon);
 		}

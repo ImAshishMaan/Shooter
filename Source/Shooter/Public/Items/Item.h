@@ -162,6 +162,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
 	UTexture2D* AmmoIcon;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
+	int32 SlotIndex;
+
 public:
 
 	FORCEINLINE UWidgetComponent* GetPickUpWidget() const { return PickupWidgetComp; }
@@ -169,6 +172,9 @@ public:
 	FORCEINLINE UBoxComponent* GetCollisionBox() const { return CollisionBoxComp; }
 	FORCEINLINE EItemState GetItemState() const { return ItemState; }
 	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
+	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
+	FORCEINLINE void SetSlotIndex(int32 Index) { SlotIndex = Index; }
+	
 	void SetItemState(EItemState State);
 
 	FORCEINLINE USkeletalMeshComponent* GetItemMesh() const { return ItemMeshComp; }
