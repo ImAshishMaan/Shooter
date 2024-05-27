@@ -235,7 +235,7 @@ void AItem::FinishInterping() {
 	bInterping = false;
 	if(Character) {
 		Character->GetPickUpItem(this);
-		SetItemState(EItemState::EIS_Pickup);
+		//SetItemState(EItemState::EIS_PickedUp);
 	}
 	DisableGlowMaterial();
 	bCanChangeCustomDepth = true;
