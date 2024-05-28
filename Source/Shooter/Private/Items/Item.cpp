@@ -161,6 +161,7 @@ void AItem::SetItemProperties(EItemState State) {
 		CollisionBoxComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		break;
 	case EItemState::EIS_Falling:
+		ItemMeshComp->SetVisibility(true);
 		ItemMeshComp->SetSimulatePhysics(true);
 		ItemMeshComp->SetEnableGravity(true);
 		ItemMeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -254,7 +255,6 @@ void AItem::FinishInterping() {
 	bInterping = false;
 	if(Character) {
 		Character->GetPickUpItem(this);
-		//SetItemState(EItemState::EIS_PickedUp);
 	}
 	DisableGlowMaterial();
 	bCanChangeCustomDepth = true;
