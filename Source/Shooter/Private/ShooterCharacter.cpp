@@ -102,6 +102,12 @@ void AShooterCharacter::TraceForItems() {
 			if(TraceHitItem && TraceHitItem->GetPickUpWidget()) {
 				TraceHitItem->GetPickUpWidget()->SetVisibility(true);
 				TraceHitItem->EnableCustomDepth();
+
+				if(Inventory.Num() >= INVENTORY_CAPACITY) {
+					TraceHitItem->SetCharacterInventoryFull(true);
+				}else {
+					TraceHitItem->SetCharacterInventoryFull(false);
+				}
 			}
 			if(TraceHitItemLastFrame) {
 				if(TraceHitItem != TraceHitItemLastFrame) {
@@ -476,6 +482,10 @@ void AShooterCharacter::FinishReloading() {
 	}
 }
 
+void AShooterCharacter::FinishEquipping() {
+	CombatState = ECombatState::ECS_Unoccupied;
+}
+
 void AShooterCharacter::IncrementOverlappedItemCount(int8 Amount) {
 	if(OverlappedItemCount + Amount <= 0) {
 		OverlappedItemCount = 0;
@@ -548,7 +558,13 @@ void AShooterCharacter::ExchangeInventoryItems(int32 CurrentItemIndex, int32 New
 
 	OldEquippedWeapon->SetItemState(EItemState::EIS_PickedUp);
 	NewWeapon->SetItemState(EItemState::EIS_Equipped);
-	
+
+	CombatState = ECombatState::ECS_Equipping;
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if(AnimInstance && EquipAnimMontage) {
+		AnimInstance->Montage_Play(EquipAnimMontage, 1.0f);
+		AnimInstance->Montage_JumpToSection(FName("Equip"));
+	}
 	
 }
 

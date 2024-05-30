@@ -42,6 +42,8 @@ public:
 	AItem();
 	virtual void Tick(float DeltaTime) override;
 
+	void PlayEquipSound(bool bForcePlaySound = false);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -165,6 +167,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
 	int32 SlotIndex;
 
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
+	bool bCharacterInventoryFull;
+
 public:
 
 	FORCEINLINE UWidgetComponent* GetPickUpWidget() const { return PickupWidgetComp; }
@@ -174,6 +180,7 @@ public:
 	FORCEINLINE int32 GetItemCount() const { return ItemCount; }
 	FORCEINLINE int32 GetSlotIndex() const { return SlotIndex; }
 	FORCEINLINE void SetSlotIndex(int32 Index) { SlotIndex = Index; }
+	FORCEINLINE void SetCharacterInventoryFull(bool bState) { bCharacterInventoryFull = bState; }
 	
 	void SetItemState(EItemState State);
 

@@ -13,6 +13,9 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime) {
 		FVector Velocity = ShooterCharacter->GetVelocity();
 		Velocity.Z = 0;
 		Speed = Velocity.Size();
+
+		bReloading = ShooterCharacter->GetCombatState() == ECombatState::ECS_Reloading;
+		bEquipping = ShooterCharacter->GetCombatState() == ECombatState::ECS_Equipping;
 		
 		bIsInAir = ShooterCharacter->GetCharacterMovement()->IsFalling();
 		
